@@ -10,11 +10,11 @@ app.use(express.json());
 
 // ── YOUR MySQL CREDENTIALS ──────────────────────
 const DB_CONFIG = {
-  host     : process.env.MYSQLHOST     || "mainline.proxy.rlwy.net",
-  user     : process.env.MYSQLUSER     || "root",
-  password : process.env.MYSQLPASSWORD || "BqaidLazmvhNxMlBgUVXTDAQyUDhKwwI",
-  database : process.env.MYSQLDATABASE || "railway",
-  port     : process.env.MYSQLPORT     || 32529
+  host     : "mainline.proxy.rlwy.net",
+  user     : "root",
+  password : "BqaidLazmvhNxMlBgUVXTDAQyUDhKwwI",
+  database : "railway",
+  port     : 32529
 };
 // ───────────────────────────────────────────────
 
