@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sleep & Stress Study — Student Survey</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#f7f4ef;
+  --card:#ffffff;
+  --border:#e2ddd6;
+  --accent:#2d6a4f;
+  --accent-light:#d8f3dc;
+  --accent2:#e76f51;
+  --text:#1a1a2e;
+  --muted:#7c7c8a;
+  --font-h:'Playfair Display',serif;
+  --font-b:'IBM Plex Sans',sans-serif;
+}
+
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  font-family:var(--font-b);
+  color:var(--text);
+  min-height:100vh;
+  padding-bottom:60px;
+}
+
+/* Grain overlay */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:.4;
+}
+
+/* TOP BAR */
+.topbar{
+  background:var(--accent);
+  color:#fff;
+  padding:12px 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 12px rgba(45,106,79,.2);
+}
+.topbar-title{font-family:var(--font-h);font-size:1rem;letter-spacing:.02em}
+.topbar-sub{font-size:11px;opacity:.75;margin-top:2px}
+
+/* PROGRESS */
+.progress-wrap{background:rgba(255,255,255,.2);border-radius:20px;height:4px;width:160px}
+.progress-bar{height:4px;border-radius:20px;background:#fff;transition:width .5s ease}
+.progress-label{font-size:10px;opacity:.8;margin-top:4px;text-align:right}
+
+/* HERO */
+.hero{
+  position:relative;z-index:1;
+  max-width:640px;margin:48px auto 0;padding:0 20px;
+  text-align:center;
+}
+.hero h1{font-family:var(--font-h);font-size:2.4rem;line-height:1.15;color:var(--text)}
+.hero h1 em{color:var(--accent);font-style:italic}
+.hero p{margin-top:12px;font-size:14px;color:var(--muted);line-height:1.7;font-weight:300}
+.hero-divider{
+  width:48px;height:3px;background:var(--accent2);
+  border-radius:2px;margin:20px auto 0;
+}
+
+/* WRAPPER */
+.wrapper{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:0 20px}
+
+/* SECTION CARD */
+.section-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:36px 32px;
+  margin-top:32px;
+  box-shadow:0 4px 24px rgba(0,0,0,.05);
+  display:none;
+  animation:slideIn .35s ease;
+}
+.section-card.active{display:block}
+
+@keyframes slideIn{
+  from{opacity:0;transform:translateY(16px)}
+  to{opacity:1;transform:none}
+}
+
+.section-tag{
+  display:inline-block;
+  font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);background:var(--accent-light);
+  padding:4px 12px;border-radius:20px;margin-bottom:16px;
+  font-weight:500;
+}
+.section-title{font-family:var(--font-h);font-size:1.5rem;margin-bottom:6px}
+.section-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:28px;font-weight:300}
+
+/* PARTICIPANT ID */
+.form-group{margin-bottom:22px}
+label.field-label{
+  display:block;font-size:12px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:8px;font-weight:500;
+}
+input[type="text"]{
+  width:100%;padding:12px 16px;
+  background:#fafafa;border:1.5px solid var(--border);
+  border-radius:10px;font-family:var(--font-b);font-size:14px;color:var(--text);
+  outline:none;transition:border-color .2s,box-shadow .2s;
+}
+input[type="text"]:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 4px rgba(45,106,79,.08);
+}
+
+/* PSS QUESTIONS */
+.q-block{margin-bottom:28px}
+.q-text{
+  font-size:14px;line-height:1.6;color:var(--text);
+  margin-bottom:12px;font-weight:400;
+}
+.q-num{
+  font-family:var(--font-h);font-size:1.1rem;
+  color:var(--accent);margin-right:8px;font-style:italic;
+}
+
+.options-row{display:flex;gap:8px;flex-wrap:wrap}
+.opt{
+  flex:1;min-width:80px;
+  padding:10px 8px;text-align:center;
+  background:#fafafa;border:1.5px solid var(--border);
+  border-radius:10px;cursor:pointer;
+  font-size:12px;color:var(--muted);
+  transition:all .18s;line-height:1.3;
+  user-select:none;
+}
+.opt:hover{border-color:var(--accent);color:var(--text);background:#f0faf5}
+.opt.selected{
+  background:var(--accent);border-color:var(--accent);
+  color:#fff;font-weight:500;
+  box-shadow:0 2px 12px rgba(45,106,79,.25);
+}
+.opt .score-badge{
+  display:block;font-family:var(--font-h);
+  font-size:1rem;margin-bottom:2px;
+}
+
+/* SLEEP OPTIONS (radio style) */
+.sleep-options{display:flex;flex-direction:column;gap:8px}
+.sleep-opt{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 16px;
+  background:#fafafa;border:1.5px solid var(--border);
+  border-radius:10px;cursor:pointer;
+  transition:all .18s;user-select:none;
+}
+.sleep-opt:hover{border-color:var(--accent);background:#f0faf5}
+.sleep-opt.selected{
+  border-color:var(--accent);background:var(--accent-light);
+}
+.sleep-opt .radio-dot{
+  width:18px;height:18px;border-radius:50%;
+  border:2px solid var(--border);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .18s;
+}
+.sleep-opt.selected .radio-dot{border-color:var(--accent)}
+.sleep-opt.selected .radio-dot::after{
+  content:'';width:8px;height:8px;border-radius:50%;background:var(--accent);
+}
+.sleep-opt span{font-size:13px;color:var(--text)}
+
+/* PSS SCORE PREVIEW */
+.pss-preview{
+  background:linear-gradient(135deg,var(--accent-light),#f0faf5);
+  border:1px solid rgba(45,106,79,.2);
+  border-radius:12px;padding:16px 20px;
+  display:flex;align-items:center;gap:16px;
+  margin-top:8px;
+}
+.pss-score-big{font-family:var(--font-h);font-size:2.2rem;color:var(--accent)}
+.pss-info strong{display:block;font-size:13px;color:var(--text)}
+.pss-info span{font-size:11px;color:var(--muted)}
+
+/* NAVIGATION */
+.nav-row{
+  display:flex;gap:12px;margin-top:32px;
+  align-items:center;justify-content:space-between;
+}
+.btn{
+  padding:13px 28px;border-radius:10px;border:none;
+  font-family:var(--font-b);font-size:13px;font-weight:500;
+  cursor:pointer;transition:all .2s;letter-spacing:.03em;
+}
+.btn-next{
+  background:var(--accent);color:#fff;
+  box-shadow:0 4px 16px rgba(45,106,79,.25);
+}
+.btn-next:hover{background:#235c41;transform:translateY(-1px);box-shadow:0 6px 20px rgba(45,106,79,.3)}
+.btn-back{
+  background:none;color:var(--muted);
+  border:1.5px solid var(--border);
+}
+.btn-back:hover{border-color:var(--accent);color:var(--accent)}
+.btn-submit{
+  background:var(--accent2);color:#fff;
+  box-shadow:0 4px 16px rgba(231,111,81,.25);
+}
+.btn-submit:hover{background:#cf5d3f;transform:translateY(-1px)}
+
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+
+/* VALIDATION MSG */
+.val-msg{
+  font-size:12px;color:var(--accent2);margin-top:8px;
+  display:none;
+}
+.val-msg.show{display:block}
+
+/* THANK YOU */
+#thankYou{
+  display:none;
+  text-align:center;padding:60px 20px;
+  animation:slideIn .5s ease;
+}
+#thankYou .ty-icon{font-size:3.5rem;margin-bottom:16px}
+#thankYou h2{font-family:var(--font-h);font-size:2rem;color:var(--accent);margin-bottom:12px}
+#thankYou p{font-size:14px;color:var(--muted);line-height:1.7;font-weight:300}
+.ty-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:40px 32px;margin-top:32px;
+  box-shadow:0 4px 24px rgba(0,0,0,.05);
+}
+
+/* ERROR TOAST */
+#toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:#1a1a2e;color:#fff;padding:12px 24px;border-radius:10px;
+  font-size:13px;opacity:0;transition:all .3s;pointer-events:none;z-index:999;
+  white-space:nowrap;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.err{background:#c0392b}
+#toast.ok{background:var(--accent)}
+
+@media(max-width:480px){
+  .hero h1{font-size:1.8rem}
+  .section-card{padding:24px 20px}
+  .options-row{flex-direction:column}
+  .opt{min-width:unset}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <div class="topbar-title">Sleep &amp; Stress Study</div>
+    <div class="topbar-sub">Student Research Survey</div>
+  </div>
+  <div>
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+    <div class="progress-label" id="progressLabel">0 / 3</div>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero" id="heroBlock">
+  <h1>How are you <em>sleeping</em> &amp; feeling?</h1>
+  <p>This short survey is part of a research study on sleep patterns and stress levels in students. It takes about 5–7 minutes. All responses are anonymous.</p>
+  <div class="hero-divider"></div>
+</div>
+
+<div class="wrapper">
+
+  <!-- ══ SECTION 0: PARTICIPANT ID ══ -->
+  <div class="section-card active" id="sec-0">
+    <span class="section-tag">Getting Started</span>
+    <h2 class="section-title">Before we begin</h2>
+    <p class="section-desc">Enter the participant code given to you by the researcher.</p>
+    <div class="form-group">
+      <label class="field-label">Participant ID / Code</label>
+      <input type="text" id="pid" placeholder="e.g. STU001" autocomplete="off"/>
+    </div>
+    <p class="val-msg" id="val-0">Please enter your Participant ID to continue.</p>
+    <div class="nav-row" style="justify-content:flex-end">
+      <button class="btn btn-next" onclick="nextSection(0)">Begin Survey →</button>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 1: PSS ══ -->
+  <div class="section-card" id="sec-1">
+    <span class="section-tag">Section 1 of 2</span>
+    <h2 class="section-title">Perceived Stress Scale</h2>
+    <p class="section-desc">For each question, choose how often you have felt or thought a certain way <strong>in the last month</strong>.</p>
+
+    <div id="pssContainer"></div>
+
+    <div class="pss-preview">
+      <span class="pss-score-big" id="pssScoreDisplay">—</span>
+      <div class="pss-info">
+        <strong id="pssLabelDisplay">Answer all questions</strong>
+        <span>PSS Score (0 – 40)</span>
+      </div>
+    </div>
+
+    <p class="val-msg" id="val-1">Please answer all 10 questions before continuing.</p>
+    <div class="nav-row">
+      <button class="btn btn-back" onclick="prevSection(1)">← Back</button>
+      <button class="btn btn-next" onclick="nextSection(1)">Next: Sleep Behaviour →</button>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 2: SLEEP ══ -->
+  <div class="section-card" id="sec-2">
+    <span class="section-tag">Section 2 of 2</span>
+    <h2 class="section-title">Sleep Behaviour</h2>
+    <p class="section-desc">Tell us about your typical sleep patterns and daily habits over the <strong>past week</strong>.</p>
+
+    <div id="sleepContainer"></div>
+
+    <p class="val-msg" id="val-2">Please answer all questions before submitting.</p>
+    <div class="nav-row">
+      <button class="btn btn-back" onclick="prevSection(2)">← Back</button>
+      <button class="btn btn-submit" onclick="submitForm()">Submit Survey ✓</button>
+    </div>
+  </div>
+
+  <!-- ══ THANK YOU ══ -->
+  <div id="thankYou">
+    <div class="ty-card">
+      <div class="ty-icon">🌿</div>
+      <h2>Thank you!</h2>
+      <p>Your responses have been recorded successfully.<br/>Your participation helps us understand sleep and stress patterns in students better.<br/><br/>You may now close this page.</p>
+    </div>
+  </div>
+
+</div><!-- /wrapper -->
+
+<div id="toast"></div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────
+const API = "http://localhost:3001";
+
+// ── PSS DATA ────────────────────────────────────────────────────
+const PSS_QUESTIONS = [
+  "In the last month, how often have you been upset because of something that happened unexpectedly?",
+  "In the last month, how often have you felt that you were unable to control the important things in your life?",
+  "In the last month, how often have you felt nervous and stressed?",
+  "In the last month, how often have you felt confident about your ability to handle your personal problems?",
+  "In the last month, how often have you felt that things were going your way?",
+  "In the last month, how often have you found that you could not cope with all the things that you had to do?",
+  "In the last month, how often have you been able to control irritations in your life?",
+  "In the last month, how often have you felt that you were on top of things?",
+  "In the last month, how often have you been angered because of things that happened that were outside of your control?",
+  "In the last month, how often have you felt difficulties were piling up so high that you could not overcome them?"
+];
+
+// Options in YOUR order with score mapping
+const PSS_OPTIONS = [
+  { label: "Sometimes",      score: 2 },
+  { label: "Almost Never",   score: 1 },
+  { label: "Fairly Often",   score: 3 },
+  { label: "Never",          score: 0 },
+  { label: "Very Often",     score: 4 }
+];
+
+// Reverse scored items (0-indexed): Q4,Q5,Q7,Q8
+const PSS_REVERSE = [3, 4, 6, 7];
+
+const pssAnswers = new Array(10).fill(null); // stores option index
+
+// ── SLEEP DATA ───────────────────────────────────────────────────
+const SLEEP_QUESTIONS = [
+  {
+    id: "sleep_bedtime",
+    text: "What time do you usually go to sleep at night?",
+    options: ["Before 10 PM","10–11 PM","11–12 AM","12–1 AM","After 1 AM"]
+  },
+  {
+    id: "sleep_onset",
+    text: "How long does it usually take you to fall asleep?",
+    options: ["Less than 10 minutes","10–30 minutes","30–60 minutes","More than 1 hour"]
+  },
+  {
+    id: "phone_after_bed",
+    text: "On average, how long do you use your phone after going to bed?",
+    options: ["Less than 10 minutes","10–30 minutes","30–60 minutes","1–2 hours","More than 2 hours"]
+  },
+  {
+    id: "notif_wake",
+    text: "How often do phone notifications wake you up at night?",
+    options: ["Never","Rarely","Sometimes","Often"]
+  },
+  {
+    id: "phone_freq_bed",
+    text: "How often do you use your phone after going to bed?",
+    options: ["Never (Zero Times Per Day)","Sometimes (3–5 Times Per Day)","Often (5–8 Times Per Day)","Almost every night"]
+  },
+  {
+    id: "time_outside",
+    text: "On average, how many hours per day do you spend outside your home?",
+    options: ["Less than 1 hour","1–3 hours","3–6 hours","More than 6 hours"]
+  },
+  {
+    id: "daily_travel",
+    text: "On average, how far do you travel daily?",
+    options: ["Less than 1 km","1–3 km","3–5 km","5–10 km","More than 10 km"]
+  },
+  {
+    id: "organization",
+    text: "In the past week, how organized did you feel in managing your daily activities?",
+    options: ["Very disorganized","Somewhat disorganized","Neutral","Organized","Very organized"]
+  },
+  {
+    id: "motivation",
+    text: "How motivated did you feel to complete tasks?",
+    options: ["Very low motivation","Low motivation","Neutral","High motivation","Very high motivation"]
+  },
+  {
+    id: "wake_time",
+    text: "What time do you usually wake up?",
+    options: ["Before 6 AM","6–7 AM","7–8 AM","8–9 AM","After 9 AM"]
+  },
+  {
+    id: "sleep_quality",
+    text: "How would you rate your sleep quality during the last week?",
+    options: ["Very good","Good","Average","Poor","Very poor"]
+  }
+];
+
+const sleepAnswers = {}; // id → selected option string
+
+// ── BUILD PSS ────────────────────────────────────────────────────
+function buildPSS() {
+  const container = document.getElementById("pssContainer");
+  PSS_QUESTIONS.forEach((q, qi) => {
+    const div = document.createElement("div");
+    div.className = "q-block";
+    div.innerHTML = `
+      <p class="q-text"><span class="q-num">${qi+1}.</span>${q}</p>
+      <div class="options-row">
+        ${PSS_OPTIONS.map((opt, oi) => `
+          <div class="opt" onclick="selectPSS(${qi},${oi},this)">
+            <span class="score-badge">${opt.score}</span>
+            ${opt.label}
+          </div>
+        `).join("")}
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+function selectPSS(qi, oi, el) {
+  el.closest(".options-row").querySelectorAll(".opt").forEach(e => e.classList.remove("selected"));
+  el.classList.add("selected");
+  pssAnswers[qi] = oi;
+  updatePSSScore();
+}
+
+function updatePSSScore() {
+  const filled = pssAnswers.filter(v => v !== null).length;
+  if (filled === 0) return;
+  let total = 0;
+  pssAnswers.forEach((oi, qi) => {
+    if (oi === null) return;
+    const raw = PSS_OPTIONS[oi].score;
+    total += PSS_REVERSE.includes(qi) ? (4 - raw) : raw;
+  });
+  const display = filled < 10 ? `~${Math.round(total * 10 / filled)}` : `${total}`;
+  document.getElementById("pssScoreDisplay").textContent = display;
+  const score = filled === 10 ? total : Math.round(total * 10 / filled);
+  const lbl = score <= 13 ? "Low Stress 🟢" : score <= 26 ? "Moderate Stress 🟡" : "High Stress 🔴";
+  document.getElementById("pssLabelDisplay").textContent = lbl;
+}
+
+function calcFinalPSS() {
+  if (pssAnswers.includes(null)) return null;
+  let total = 0;
+  pssAnswers.forEach((oi, qi) => {
+    const raw = PSS_OPTIONS[oi].score;
+    total += PSS_REVERSE.includes(qi) ? (4 - raw) : raw;
+  });
+  return total;
+}
+
+// ── BUILD SLEEP ──────────────────────────────────────────────────
+function buildSleep() {
+  const container = document.getElementById("sleepContainer");
+  SLEEP_QUESTIONS.forEach((q, qi) => {
+    const div = document.createElement("div");
+    div.className = "q-block";
+    div.innerHTML = `
+      <p class="q-text"><span class="q-num">${qi+1}.</span>${q.text}</p>
+      <div class="sleep-options">
+        ${q.options.map(opt => `
+          <div class="sleep-opt" onclick="selectSleep('${q.id}',this,'${opt.replace(/'/g,"\\'")}')">
+            <div class="radio-dot"></div>
+            <span>${opt}</span>
+          </div>
+        `).join("")}
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+function selectSleep(qid, el, val) {
+  el.closest(".sleep-options").querySelectorAll(".sleep-opt").forEach(e => e.classList.remove("selected"));
+  el.classList.add("selected");
+  sleepAnswers[qid] = val;
+}
+
+// ── SECTION NAV ──────────────────────────────────────────────────
+let currentSection = 0;
+const TOTAL_SECTIONS = 3; // 0,1,2
+
+function showSection(n) {
+  document.querySelectorAll(".section-card").forEach(c => c.classList.remove("active"));
+  const el = document.getElementById("sec-"+n);
+  if (el) { el.classList.add("active"); el.scrollIntoView({behavior:"smooth", block:"start"}); }
+  currentSection = n;
+  const pct = Math.round((n / TOTAL_SECTIONS) * 100);
+  document.getElementById("progressBar").style.width = pct + "%";
+  document.getElementById("progressLabel").textContent = n + " / " + TOTAL_SECTIONS;
+  if (n > 0) document.getElementById("heroBlock").style.display = "none";
+}
+
+function nextSection(from) {
+  // Validate
+  if (from === 0) {
+    if (!document.getElementById("pid").value.trim()) {
+      showVal("val-0"); return;
+    }
+    hideVal("val-0");
+  }
+  if (from === 1) {
+    if (pssAnswers.includes(null)) {
+      showVal("val-1"); return;
+    }
+    hideVal("val-1");
+  }
+  showSection(from + 1);
+}
+
+function prevSection(from) { showSection(from - 1); }
+
+function showVal(id) { document.getElementById(id).classList.add("show"); }
+function hideVal(id) { document.getElementById(id).classList.remove("show"); }
+
+// ── SUBMIT ───────────────────────────────────────────────────────
+async function submitForm() {
+  // Validate all sleep answered
+  const unanswered = SLEEP_QUESTIONS.filter(q => !sleepAnswers[q.id]);
+  if (unanswered.length > 0) {
+    showVal("val-2");
+    toast("Please answer all questions", true);
+    return;
+  }
+  hideVal("val-2");
+
+  const payload = {
+    participant_id : document.getElementById("pid").value.trim(),
+    pss_score      : calcFinalPSS(),
+    // Sleep section
+    sleep_bedtime   : sleepAnswers.sleep_bedtime,
+    sleep_onset     : sleepAnswers.sleep_onset,
+    phone_after_bed : sleepAnswers.phone_after_bed,
+    notif_wake      : sleepAnswers.notif_wake,
+    phone_freq_bed  : sleepAnswers.phone_freq_bed,
+    time_outside    : sleepAnswers.time_outside,
+    daily_travel    : sleepAnswers.daily_travel,
+    organization    : sleepAnswers.organization,
+    motivation      : sleepAnswers.motivation,
+    wake_time       : sleepAnswers.wake_time,
+    sleep_quality   : sleepAnswers.sleep_quality
+  };
+
+  try {
+    const r = await fetch(API + "/api/entries", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
+    const d = await r.json();
+    if (d.success) {
+      // Show thank you
+      document.querySelectorAll(".section-card").forEach(c => c.style.display = "none");
+      document.getElementById("thankYou").style.display = "block";
+      document.getElementById("progressBar").style.width = "100%";
+      document.getElementById("progressLabel").textContent = "Complete ✓";
+      window.scrollTo({top:0, behavior:"smooth"});
+    } else {
+      throw new Error(d.error);
+    }
+  } catch(e) {
+    toast("Could not save: " + e.message, true);
+  }
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────
+function toast(msg, isErr=false) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "show " + (isErr ? "err" : "ok");
+  setTimeout(() => t.className = "", 3000);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────
+buildPSS();
+buildSleep();
+</script>
+</body>
+</html>
