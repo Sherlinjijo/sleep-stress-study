@@ -81,7 +81,8 @@ app.post("/api/entries", async (req, res) => {
     await db.end();
     res.json({ success: true, id: result.insertId });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error("FULL ERROR:", err);
+    res.status(500).json({ success: false, error: err.message, stack: err.stack });
   }
 });
 
