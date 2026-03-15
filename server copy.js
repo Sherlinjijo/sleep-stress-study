@@ -10,10 +10,11 @@ app.use(express.json());
 
 // ── YOUR MySQL CREDENTIALS ──────────────────────
 const DB_CONFIG = {
-  host     : "localhost",
-  user     : "root",           // ← your MySQL username
-  password : "admin123",  // ← your MySQL password
-  database : "health_tracker"
+  host     : process.env.MYSQLHOST,
+  user     : process.env.MYSQLUSER,
+  password : process.env.MYSQLPASSWORD,
+  database : process.env.MYSQLDATABASE,
+  port     : process.env.MYSQLPORT
 };
 // ───────────────────────────────────────────────
 
