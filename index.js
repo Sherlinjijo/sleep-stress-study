@@ -115,6 +115,21 @@ app.delete("/api/entries/:id", async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+// Keep Railway awake - ping every 5 minutes
+setInterval(async () => {
+  try {
+    const db = await mysql.createConnection(DB_CONFIG);
+    await db.execute("SELECT 1");
+    await db.end();
+    console.log("💓 Keepalive ping");
+  } catch(e) {
+    console.log("Keepalive failed:", e.message);
+  }
+}, 5 * 60 * 1000);
+
+app.get("/", (req, res) => {
+  res.json({ status: "ok", message: "Server is running" });
+});
 
 app.listen(PORT, () =>
   console.log(`🚀 Server running at http://localhost:${PORT}`)
